@@ -1,0 +1,552 @@
+package sami;
+import java.util.Scanner;
+abstract class BankAccount {
+  protected String accountNumber;
+  protected double balance;
+  protected String name;
+
+  public BankAccount(String accountNumber, double balance,String name) {
+    this.accountNumber = accountNumber;
+    this.balance = balance;
+    this.name = name;
+  }
+
+  public String getAccountNumber() {
+    return accountNumber;
+  }
+
+  public double getBalance() {
+    return balance;
+  }
+  public String getname() {
+	    return name;
+	  }
+
+  public void deposit(double amount) {
+    balance += amount;
+  }
+
+  public abstract void withdraw(double amount);
+  public abstract void applyforloan(double amount);
+  public abstract void payloan(double amount);
+
+public abstract void f(double amount);
+}
+class SavingsAccounts extends BankAccount {
+  private double interestRate;
+  private double loanamt;
+  private int flag=0;
+  private double Emi;
+
+  public SavingsAccounts(String accountNumber, double balance, double interestRate,String name) {
+    super(accountNumber, balance,name);
+    this.interestRate = interestRate;
+  }
+
+  @Override
+  public void withdraw(double amount) {
+    if (amount > balance)
+    {
+      System.out.println("Insufficient balance");
+      return;
+    }
+    else {
+    balance -= amount;
+    System.out.println("Withdrawal succesfull");
+  }
+  }
+
+  public void addInterest() {
+    balance += balance * interestRate;
+  }
+
+@Override
+
+public void f(double amount) {
+	double tot,interest,roi,time;
+	int w,m,y,ten; 
+	Scanner in=new Scanner(System.in);
+	System.out.println("choose tenure of the deposit:");
+	System.out.println("1.weekly");
+	System.out.println("Rate of Interest:4");
+	System.out.println("2.Monthly");
+	System.out.println("Rate of Interest:5.5");
+	System.out.println("3.Yearly");
+	System.out.println("Rate of Interest:7.5");
+	ten=in.nextInt();
+if(ten==1){
+	System.out.println("Enter number of weeks");
+	w=in.nextInt();
+	roi=4;
+	interest=(amount*w*roi*7)/(365*100);
+	tot=amount+interest;
+	System.out.println("Your amount is successfully deposited");
+	System.out.println("Amount you will receive after "+w+" weeks:"+tot);
+}
+else if(ten==2) {
+	System.out.println("Enter number of months");
+	m=in.nextInt();
+	roi=5.5;
+	interest=(amount*m*roi*30)/(365*100);
+	tot=amount+interest;
+	System.out.println("Your amount is successfully deposited");
+	System.out.println("Amount you will receive after "+m+" months:"+tot);
+}
+else if(ten==3) {
+	System.out.println("Enter number of years");
+	y=in.nextInt();
+	roi=7.5;
+	interest=(amount*y*roi)/(100);
+	tot=amount+interest;
+	System.out.println("Your amount is successfully deposited");
+	System.out.println("Amount you will receive after "+y+" years:"+tot);
+}
+else {
+	System.out.println("Invalid coice");
+}
+	
+	
+}
+
+@Override
+public void applyforloan(double amount) {
+	if (balance>1000)
+	{
+		Scanner scanner=new Scanner(System.in);
+		  System.out.println("Choose loan type: ");
+		  System.out.println("1. Personal loan\n2. Home loan\n3. Car loan\n4. Small Business loan\n5. Education loan");
+		  int loanType = scanner.nextInt();
+		  System.out.println("Enter loan term (in years): ");
+		  int loanTerm = scanner.nextInt();
+		  double interestRate = 0;
+		  if (loanType == 1) {
+			  interestRate = 10;
+		  }
+		  else if (loanType == 2) {
+			  interestRate = 8;
+		  }
+		  else if (loanType == 3) {
+			  interestRate = 5;
+		  }
+		  else if (loanType == 4) {
+			  interestRate = 9;
+		  }
+		  else if (loanType == 5) {
+			  interestRate = 5.7;
+		  }else {
+			  System.out.println("Invalid loan type\nPlease try again.");
+			  return;
+		  }
+		  double monthlyPayment= calculateMonthlyPayment(amount, loanTerm, interestRate);
+		  System.out.println("Monthly payement: "+monthlyPayment);
+		  this.Emi=monthlyPayment;
+		  flag=1;
+		  loanamt=amount;
+	
+	}
+	else
+	{
+		System.out.println("OOPS You Are Not ELigible For Loan");
+		
+	}
+	
+}	
+public double calculateMonthlyPayment(double loanAmount, int loanTerm, double interestRate) {
+	  double monthlyInterestRate = interestRate / 100 / 12;
+	  int numberOfPayments = loanTerm *12;
+	  double monthlyPayment = loanAmount * monthlyInterestRate/(1-Math.pow(1+monthlyInterestRate, -numberOfPayments));
+	  return monthlyPayment;
+}
+
+@Override
+public void payloan(double amount) {
+	if(loanamt>0)
+	{
+		if(flag==0) 
+		{
+		System.out.println("You have No loans To pay");
+		}
+		else
+		{
+			System.out.println("You are going to pay emi");
+			System.out.println("Enter the no of months directly");
+			Scanner scanner=new Scanner(System.in);
+			int z=scanner.nextInt();
+			for(int i=1;i<=z;i++)
+			{
+				balance-=Emi;
+				loanamt-=Emi;
+			}
+			System.out.println("remaining loan"+loanamt);
+			System.out.println("remaining balance in your account"+balance);
+
+		}	
+	}
+	else
+	{
+		System.out.println("All loans are paid");
+		flag=0;
+	}
+	
+	
+	
+	
+}
+}
+class CurrentAccounts extends BankAccount {
+  private double overdraftLimit;
+  private int flag=0;
+  private double Emi;
+  private double loanamt;
+  
+  
+  
+
+  public CurrentAccounts(String accountNumber, double balance, double overdraftLimit,String name) {
+    super(accountNumber, balance,name);
+    this.overdraftLimit = overdraftLimit;
+  }
+
+  @Override
+  public void withdraw(double amount) {
+    if (amount > balance + overdraftLimit) {
+      System.out.println("Insufficient balance");
+      return;
+    }
+    balance -= amount;
+  }
+
+@Override
+public void f(double amount) {
+	double tot,interest,roi,time;
+	int w,m,y,ten; 
+	Scanner in=new Scanner(System.in);
+	System.out.println("choose tenure of the deposit:");
+	System.out.println("1.weekly");
+	System.out.println("Rate of Interest:4");
+	System.out.println("2.Monthly");
+	System.out.println("Rate of Interest:5.5");
+	System.out.println("3.Yearly");
+	System.out.println("Rate of Interest:7.5");
+	ten=in.nextInt();
+if(ten==1){
+	System.out.println("Enter number of weeks");
+	w=in.nextInt();
+	roi=4;
+	interest=(amount*w*roi*7)/(365*100);
+	tot=amount+interest;
+	System.out.println("Your amount is successfully deposited");
+	System.out.println("Amount you will receive after "+w+" weeks:"+tot);
+}
+else if(ten==2) {
+	System.out.println("Enter number of months");
+	m=in.nextInt();
+	roi=5.5;
+	interest=(amount*m*roi*30)/(365*100);
+	tot=amount+interest;
+	System.out.println("Your amount is successfully deposited");
+	System.out.println("Amount you will receive after "+m+" months:"+tot);
+}
+else if(ten==3) {
+	System.out.println("Enter number of years");
+	y=in.nextInt();
+	roi=7.5;
+	interest=(amount*y*roi)/(100);
+	tot=amount+interest;
+	System.out.println("Your amount is successfully deposited");
+	System.out.println("Amount you will receive after "+y+" years:"+tot);
+}
+else {
+	System.out.println("Invalid coice");
+}
+	
+	
+}
+
+@Override
+public void applyforloan(double amount) {
+	if (balance>1000)
+	{
+		Scanner scanner=new Scanner(System.in);
+		  System.out.println("Choose loan type: ");
+		  System.out.println("1. Personal loan\n2. Home loan\n3. Car loan\n4. Small Business loan\n5. Education loan");
+		  int loanType = scanner.nextInt();
+		  System.out.println("Enter loan term (in years): ");
+		  int loanTerm = scanner.nextInt();
+		  double interestRate = 0;
+		  if (loanType == 1) {
+			  interestRate = 10;
+		  }
+		  else if (loanType == 2) {
+			  interestRate = 8;
+		  }
+		  else if (loanType == 3) {
+			  interestRate = 5;
+		  }
+		  else if (loanType == 4) {
+			  interestRate = 9;
+		  }
+		  else if (loanType == 5) {
+			  interestRate = 5.7;
+		  }else {
+			  System.out.println("Invalid loan type\nPlease try again.");
+			  return;
+		  }
+		  double monthlyPayment= calculateMonthlyPayment(amount, loanTerm, interestRate);
+		  System.out.println("Monthly payement: "+monthlyPayment);
+		  this.Emi=monthlyPayment;
+		  flag=1;
+		  loanamt=amount;
+	}
+	else
+	{
+		System.out.println("OOPS You Are Not ELigible For Loan");
+	}
+	
+}	
+
+public double calculateMonthlyPayment(double loanAmount, int loanTerm, double interestRate) {
+	  double monthlyInterestRate = interestRate / 100 / 12;
+	  int numberOfPayments = loanTerm *12;
+	  double monthlyPayment = loanAmount * monthlyInterestRate/(1-Math.pow(1+monthlyInterestRate, -numberOfPayments));
+	  return monthlyPayment;
+}
+
+@Override
+public void payloan(double amount) {
+	if(loanamt>0)
+	{
+		if(flag==0) 
+		{
+		System.out.println("You have No loans To pay");
+		}
+		else
+		{
+			System.out.println("You are going to pay emi");
+			System.out.println("Enter the no of months directly");
+			Scanner scanner=new Scanner(System.in);
+			int z=scanner.nextInt();
+			for(int i=1;i<=z;i++)
+			{
+				balance-=Emi;
+				loanamt-=Emi;
+			}
+			System.out.println("remaining loan"+loanamt);
+			System.out.println("remaining balance in your account"+balance);
+
+		}	
+	}
+	else
+	{
+		System.out.println("All loans are paid");
+	}
+	
+	
+	
+}
+}
+
+interface BankService {
+  void createAccount();
+  void viewAccount();
+  void deposit();
+  void withdraw();
+  void f();
+  void applyforloan();
+  void payloan();
+}
+
+class Banking1 extends Thread implements BankService  {
+  private BankAccount[] accounts;
+  private Scanner scanner;
+  private volatile boolean running;
+
+  public Banking1() {
+    accounts = new BankAccount[10];
+    scanner = new Scanner(System.in);
+    running = true;
+  }
+  public void run() {
+	    while (true) {
+	    	
+	      System.out.println("1. Create account");
+	      System.out.println("2. View account");
+	      System.out.println("3. Deposit");
+	      System.out.println("4. Withdraw");
+	      System.out.println("5. applyloan");
+	      System.out.println("6. pay loan");
+	      System.out.println("7. Fixed Deposit");
+	      System.out.println("8. Exit");
+	      System.out.print("Enter choice: ");
+try {
+	      int choice = scanner.nextInt();
+	      switch (choice) {
+	        case 1:
+	          createAccount();
+	          break;
+	        case 2:
+	          viewAccount();
+	          break;
+	        case 3:
+	          deposit();
+	          break;
+	        case 4:
+	          withdraw();
+	          break;
+	        case 5:
+		          applyforloan();
+		          break;
+	        case 6:
+		          payloan();
+		          break;
+	        case 7:
+	          f();
+	        case 8:
+	        	System.exit(0);
+		          break;
+	        default:
+	        	throw new  IllegalAccessException("invalid Choice");
+
+	      }}
+	      catch(IllegalAccessException e)
+			{
+				  System.out.println(e);
+			}
+	    }
+	  }
+
+
+  @Override
+  public void createAccount() {
+    System.out.print("Enter account type (savings/current): ");
+    String type = scanner.next();
+    System.out.print("Enter account number: ");
+    String accountNumber= scanner.next();
+    System.out.print("Enter account name: ");
+    String accountName= scanner.next();
+    System.out.print("Enter initial balance: ");
+    double balance = scanner.nextDouble();
+
+    BankAccount account;
+    if (type.equals("savings")) {
+      System.out.print("Enter interest rate: ");
+      double interestRate = scanner.nextDouble();
+      account = new SavingsAccounts(accountNumber, balance, interestRate,accountName);
+    } else if (type.equals("current")) {
+      System.out.print("Enter overdraft limit: ");
+      double overdraftLimit = scanner.nextDouble();
+      account = new CurrentAccounts(accountNumber, balance, overdraftLimit,accountName);
+    } else {
+      System.out.println("Invalid account type");
+      return;
+    }
+
+    for (int i = 0; i < 500; i++) {
+      if (accounts[i] == null) {
+        accounts[i] = account;
+        System.out.println("Account created successfully");
+        return;
+      }
+    }
+    System.out.println("Could not create account. Maximum number of accounts reached.");
+  }
+
+  @Override
+  public void viewAccount() {
+    System.out.print("Enter account number: ");
+    String accountNumber = scanner.next();
+    BankAccount account = getAccount(accountNumber);
+    if (account == null) {
+      System.out.println("Account not found");
+      return;
+    }
+    System.out.println("Account number: " + account.getAccountNumber());
+    System.out.println("Balance: " + account.getBalance());
+    System.out.println("Name: " + account.getname());
+  }
+
+  @Override
+  public void deposit() {
+    System.out.print("Enter account number: ");
+    String accountNumber = scanner.next();
+    BankAccount account = getAccount(accountNumber);
+    if (account == null) {
+      System.out.println("Account not found");
+      return;
+    }
+    System.out.print("Enter amount to deposit: ");
+    double amount = scanner.nextDouble();
+    account.deposit(amount);
+    System.out.println("Deposit successful. New balance: " + account.getBalance());
+  }
+
+  @Override
+  public void withdraw() {
+    System.out.print("Enter account number: ");
+    String accountNumber = scanner.next();
+    BankAccount account = getAccount(accountNumber);
+    if (account == null) {
+      System.out.println("Account not found");
+      return;
+    }
+    System.out.print("Enter amount to withdraw: ");
+    double amount = scanner.nextDouble();
+    account.withdraw(amount);
+    System.out.println("  Balance Remaining: " + account.getBalance());
+  }
+  public void f() {
+	    System.out.print("Enter account number: ");
+	    String accountNumber = scanner.next();
+	    BankAccount account = getAccount(accountNumber);
+	    if (account == null) {
+	      System.out.println("Account not found");
+	      return;
+	    }
+	    System.out.print("Enter amount to to fixed deposit: ");
+	    double amount = scanner.nextDouble();
+	    account.f(amount);
+	    
+	  }
+  public void applyforloan() {
+	  System.out.print("Enter account number: ");
+	    String accountNumber = scanner.next();
+	    BankAccount account = getAccount(accountNumber);
+	    if (account == null) {
+	      System.out.println("Account not found");
+	      return;
+	    }
+	    System.out.print("Enter amount to loan: ");
+	    double amount = scanner.nextDouble();
+	    account.applyforloan(amount);
+		
+	}
+	@Override
+	public void payloan() {
+		System.out.print("Enter account number: ");
+	    String accountNumber = scanner.next();
+	    BankAccount account = getAccount(accountNumber);
+	    if (account == null) {
+	      System.out.println("Account not found");
+	      return;
+	    }
+	    System.out.print("Enter Your loan Amount: ");
+	    double amount = scanner.nextDouble();
+	    account.payloan(amount);
+		
+	}
+
+  private BankAccount getAccount(String accountNumber) {
+    for (BankAccount account : accounts) {
+      if (account != null && account.getAccountNumber().equals(accountNumber)) {
+        return account;
+      }
+    }
+    return null;
+  }
+  public static void main(String[] args) {
+	  
+	    Banking1 thread = new Banking1();
+	    thread.start();
+    
+  }
+}
